@@ -31,6 +31,78 @@ BOUNDS_B = {
     "Kp_z": (1e-6, 1.0), "Ki_z": (1e-9, 1e-2), "Kd_z": (1e-5, 1.0),
 }
 
+# Expert baseline (law=1): rate-limited eigenaxis quaternion feedback after
+# Wie & Lu (1995), J. Guidance Control Dyn. 18(6):1372-1379, with a small
+# integral term for bias rejection. Parameters, all physical:
+#   wn    closed-loop natural frequency (rad/s), K = wn^2 J
+#   zeta  damping ratio,                         C = 2 zeta wn J
+#   w_max eigenaxis slew-rate limit (rad/s)      (sets the saturation levels L_i)
+#   ki    integral corner as a fraction of wn    Ki_i = J_ii wn^3 ki
+# The integrator runs only in fine pointing (|e| < WIE_I_GATE), the usual ADCS
+# slew-mode / fine-pointing-mode split, so it does not wind up during slews.
+WIE_I_GATE = 2.0 * np.pi / 180.0
+BOUNDS_W = {
+    "wn": (0.02, 5.0), "zeta": (0.3, 3.0), "w_max": (0.01, 0.3), "ki": (1e-3, 1.0),
+}
+
+
+@njit
+def wie_control(em, rate, h, I, gains, Ldir, J, ctrl_dt, i_clamp, tau_max, u):
+    """u = -J (K sat_L(e) + C w) - Ki I + w x (J w + h), direction-preserving saturation.
+    Steady slew: K L_i = C w_max Ldir_i  ->  |w| = w_max along the eigenaxis."""
+    wn, zeta, wmax, ki = gains[0], gains[1], gains[2], gains[3]
+    kk = wn * wn
+    cc = 2.0 * zeta * wn
+    a = np.empty(3)
+    I_try = np.empty(3)
+    en = np.sqrt(em[0] * em[0] + em[1] * em[1] + em[2] * em[2])
+    gate = 1.0 if en < WIE_I_GATE else 0.0
+    kig = np.empty(3)
+    for i in range(3):
+        L = cc / kk * wmax * Ldir[i]
+        e = em[i]
+        if e > L:
+            e = L
+        elif e < -L:
+            e = -L
+        a[i] = kk * e + cc * rate[i]
+        kig[i] = J[i, i] * kk * wn * ki
+        it = I[i] + gate * em[i] * ctrl_dt
+        lim = i_clamp / kig[i]
+        if it > lim:
+            it = lim
+        elif it < -lim:
+            it = -lim
+        I_try[i] = it
+    H0 = J[0, 0] * rate[0] + J[0, 1] * rate[1] + J[0, 2] * rate[2] + h[0]
+    H1 = J[1, 0] * rate[0] + J[1, 1] * rate[1] + J[1, 2] * rate[2] + h[1]
+    H2 = J[2, 0] * rate[0] + J[2, 1] * rate[1] + J[2, 2] * rate[2] + h[2]
+    g0 = rate[1] * H2 - rate[2] * H1
+    g1 = rate[2] * H0 - rate[0] * H2
+    g2 = rate[0] * H1 - rate[1] * H0
+    gy = (g0, g1, g2)
+    m = 0.0
+    for i in range(3):
+        u[i] = -(J[i, 0] * a[0] + J[i, 1] * a[1] + J[i, 2] * a[2]) - kig[i] * I_try[i] + gy[i]
+        if abs(u[i]) > m:
+            m = abs(u[i])
+    sat = m > tau_max
+    if sat:
+        # saturated: freeze the integrator (anti-windup) and scale the whole vector
+        for i in range(3):
+            u[i] += kig[i] * (I_try[i] - I[i])
+        m = 0.0
+        for i in range(3):
+            if abs(u[i]) > m:
+                m = abs(u[i])
+        if m > tau_max:
+            for i in range(3):
+                u[i] *= tau_max / m
+    else:
+        for i in range(3):
+            I[i] = I_try[i]
+    return sat
+
 
 @njit
 def qmul(a0, a1, a2, a3, b0, b1, b2, b3):
@@ -109,7 +181,7 @@ def _log_state(s, k, q_ref, qi, axis, t, t_log, ang_log, trav_log, w_log, h_log,
 @njit
 def simulate_kernel(q_init, w_init, q_ref, gains, i_clamp, J, Jinv, J_w, T_m, tau_max, h_max,
                     bias, amp, period, phase, drand, att_noise, gyro_noise, gyro_bias,
-                    axis, horizon, dt, ctrl_dt, controller_on):
+                    axis, horizon, dt, ctrl_dt, controller_on, law=0):
     n_steps = int(round(horizon / dt))
     sub = int(round(ctrl_dt / dt))
     n_ctrl = n_steps // sub
@@ -140,6 +212,8 @@ def simulate_kernel(q_init, w_init, q_ref, gains, i_clamp, J, Jinv, J_w, T_m, ta
     td2 = np.empty(3)
     td4 = np.empty(3)
     qi = np.array([q_init[0], -q_init[1], -q_init[2], -q_init[3]])
+    Ldir = np.empty(3)
+    rate_m = np.empty(3)
 
     t = 0.0
     k = 0
@@ -153,7 +227,18 @@ def simulate_kernel(q_init, w_init, q_ref, gains, i_clamp, J, Jinv, J_w, T_m, ta
             qm[0], qm[1], qm[2], qm[3] = qmul(s[0], s[1], s[2], s[3], 1.0 / nn, n1 / nn, n2 / nn, n3 / nn)
             _, em[0], em[1], em[2] = error_vector(qm, q_ref)
             anysat = False
-            for i in range(3):
+            if law == 1:
+                if c == 0:
+                    en = np.sqrt(em[0] * em[0] + em[1] * em[1] + em[2] * em[2])
+                    for i in range(3):
+                        Ldir[i] = abs(em[i]) / en if en > 0.0 else 1.0 / np.sqrt(3.0)
+                for i in range(3):
+                    rate_m[i] = s[4 + i] + gyro_bias[i] + gyro_noise[c, i]
+                anysat = wie_control(em, rate_m, s[7:10], I, gains, Ldir, J, ctrl_dt, i_clamp,
+                                     tau_max, u)
+                for i in range(3):
+                    u_log[c, i] = u[i]
+            for i in range(3 if law == 0 else 0):
                 j = 0 if i < 2 else 3
                 rate = s[4 + i] + gyro_bias[i] + gyro_noise[c, i]
                 ui, Ii, si = pid_axis(em[i], rate, I[i], gains[j], gains[j + 1], gains[j + 2],
@@ -212,8 +297,9 @@ def axis_angle_quat(axis, angle):
 
 
 def run_three_axis(gains, scenario, sc, env, sim, seed=0, i_clamp_frac=0.25, noise=True,
-                   w_init=(0.0, 0.0, 0.0), controller_on=True):
-    """Stage B run. gains = (Kp_xy, Ki_xy, Kd_xy, Kp_z, Ki_z, Kd_z)."""
+                   w_init=(0.0, 0.0, 0.0), controller_on=True, law=0):
+    """Stage B run. law=0: PID, gains = (Kp_xy, Ki_xy, Kd_xy, Kp_z, Ki_z, Kd_z).
+    law=1: Wie-Lu rate-limited eigenaxis law, gains = (wn, zeta, w_max, ki)."""
     from .params import DEG
     from .simulate import RunResult, _noise
     n_ctrl = int(round(scenario.horizon / sim.ctrl_dt))
@@ -239,7 +325,7 @@ def run_three_axis(gains, scenario, sc, env, sim, seed=0, i_clamp_frac=0.25, noi
                           sc.tau_max, sc.h_max,
                           np.array(env.dist_bias) * ds, np.array(env.dist_sin_amp) * ds,
                           env.orbit_period, phase, drand, att, gyro, gb, axis,
-                          scenario.horizon, sim.dt, sim.ctrl_dt, controller_on)
+                          scenario.horizon, sim.dt, sim.ctrl_dt, controller_on, law)
     t, angl, trav, w, h, tau, q, u, sat, hcl, E, div = out
     r = RunResult(t, angl, w, h, tau, u, sat, hcl, float(E), bool(div), scenario.horizon, travel=trav)
     r.q = q

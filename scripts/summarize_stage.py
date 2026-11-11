@@ -15,9 +15,9 @@ import numpy as np
 import pandas as pd
 
 from optim.common import best_feasible, best_so_far_curve, first_feasible_iter
-from scripts.style import COL_W, COLORS, LABELS, METHOD_ORDER, save, setup
+from scripts.style import COL_W, COLORS, LABELS, METHOD_ORDER, label, save, setup
 
-FIXED = {"pidtune", "analytic"}
+FIXED = {"pidtune", "analytic", "wie_rule"}
 REACH_FRAC = 1.10   # "evaluations to reach within 10% of the best design found by any method"
 
 
@@ -83,7 +83,7 @@ def summarize(stage):
             "fixed_design_metrics": rs[0]["history"][0]["metrics"] if m in FIXED else None,
         }
     Path("results").mkdir(exist_ok=True)
-    Path(f"results/stage{stage}_summary.json").write_text(json.dumps(out, indent=2))
+    Path(f"results/stage{stage}_summary.json").write_text(json.dumps(out, indent=2), encoding="utf-8")
     return out, runs
 
 
@@ -99,7 +99,7 @@ def table(out, stage):
         fixed = m in FIXED
         bt = d["best_t_settle"]
         rows.append({
-            "method": LABELS[m],
+            "method": label(stage, m),
             "budget": d["budget"],
             "runs": d["n_runs"],
             "runs finding a feasible design": f"{d['found_feasible_frac'] * 100:.0f}%",
@@ -124,7 +124,7 @@ def table(out, stage):
     note = (f"\n\nReference best (any method, any seed): {out['reference_best_t_settle']:.2f} s; "
             f"'within 10%' threshold = {out['reach_threshold']:.2f} s. Fixed designs (pidtune, analytic) "
             f"use zero optimization budget and are a single deterministic evaluation.\n")
-    Path(f"results/tables/stage{stage}_main.md").write_text(md + note)
+    Path(f"results/tables/stage{stage}_main.md").write_text(md + note, encoding="utf-8")
     return md + note
 
 
@@ -144,12 +144,12 @@ def figures(out, runs, stage):
         med[~np.isfinite(med)] = np.nan
         hi[~np.isfinite(hi)] = np.nan
         lo[~np.isfinite(lo)] = np.nan
-        ax.plot(x, med, color=COLORS[m], label=LABELS[m])
+        ax.plot(x, med, color=COLORS[m], label=label(stage, m))
         ax.fill_between(x, lo, hi, color=COLORS[m], alpha=0.15, lw=0)
     for m in FIXED & set(runs):
         b = best_feasible(runs[m][0]["history"])
         if b:
-            ax.axhline(b["objective"], color=COLORS[m], ls="--", lw=1, label=LABELS[m] + " (fixed)")
+            ax.axhline(b["objective"], color=COLORS[m], ls="--", lw=1, label=label(stage, m) + " (fixed)")
     ax.set_yscale("log")
     ax.set_xlabel("evaluations")
     ax.set_ylabel("best feasible $t_{settle}$ (s)")

@@ -14,9 +14,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from scripts.style import LABELS, METHOD_ORDER
+from scripts.style import METHOD_ORDER, label
 
-FIXED = {"pidtune", "analytic"}
+FIXED = {"pidtune", "analytic", "wie_rule"}
 
 
 def _eval_design(args):
@@ -63,7 +63,7 @@ def main():
     out = {"stage": a.stage, "n_plants": a.n, "plant_seed": 777, "specs": specs, "designs": []}
     for (m, seed, g), rows in zip(designs, res):
         out["designs"].append({"method": m, "seed": seed, "gains": g, "plants": rows})
-    Path(f"results/robustness_stage{a.stage}.json").write_text(json.dumps(out))
+    Path(f"results/robustness_stage{a.stage}.json").write_text(json.dumps(out), encoding="utf-8")
 
     # per-method table: pool all designs of a method (per-seed compliance, then mean +- std)
     tab = []
@@ -75,7 +75,7 @@ def main():
         hold = np.array([r["e_hold_rms_deg"] for d in ds for r in d["plants"]])
         hv = np.array([r["h_violation"] for d in ds for r in d["plants"]])
         tab.append({
-            "method": LABELS.get(m, m),
+            "method": label(a.stage, m),
             "designs": len(ds),
             "spec compliance % (mean ± std over designs)": f"{np.mean(comp):.1f} ± {np.std(comp, ddof=1) if len(comp) > 1 else 0:.1f}",
             "min compliance %": f"{np.min(comp):.1f}",
@@ -88,7 +88,7 @@ def main():
     Path("results/tables").mkdir(parents=True, exist_ok=True)
     df.to_csv(f"results/tables/robustness_stage{a.stage}.csv", index=False)
     Path(f"results/tables/robustness_stage{a.stage}.md").write_text(
-        df.to_markdown(index=False) + f"\n\n{a.n} sampled plants (seed 777), identical for every design.\n")
+        df.to_markdown(index=False) + f"\n\n{a.n} sampled plants (seed 777), identical for every design.\n", encoding="utf-8")
     print(df.to_markdown(index=False))
 
 

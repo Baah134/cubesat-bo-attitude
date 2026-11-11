@@ -61,5 +61,40 @@ Dated log of design decisions, deviations from CLAUDE.md, and session notes.
 - **Analytic rule is infeasible** (overshoot 14%, does not settle in 120 s): integrator
   windup during the slew leaves a slow tail.
 
-### Next
-- Smoke-test all optimizers on Stage A, then run Stage A (7 methods × 10 seeds × 60 evals).
+## Session 2 — 2026-11-11 (Stage A/B runs, expert baseline, large slew)
+
+13. **BO acquisition switched from MC qLogNEI/qLogPOF to analytic LogCEI/LogPOF.** The MC
+    version took ~57 s per acquisition optimization (100 evals x 10 seeds would not fit
+    the day). Analytic LogConstrainedExpectedImprovement on a ModelListGP is ~1 s and is
+    the standard single-point constrained EI. Same surrogate, same budget.
+14. **Method `random` renamed `random_search`** (module name clashed with Python's
+    `random`; the first Stage A random run crashed and was rerun, nothing else changed).
+15. **Physics check on the best Stage A result (6.53 s, below the 6.63 s bang-bang
+    rest-to-rest time).** Not a bug: t_settle is entry into the 0.1° band, and the best
+    design enters the band at 0.34°/s and finishes decelerating inside it. Torque never
+    exceeds 2 mN m in that run. Rest-to-rest and band-entry times are different quantities.
+16. **Robust BO (bo_robust):** objective and constraints are the worst case over 8 training
+    plants (TRAIN_SEED 555), so every evaluation costs 8 simulations but still counts as
+    ONE evaluation against the 100 budget. This is stated wherever it is compared.
+    Its "best t_settle" in the Stage B table is a worst-of-8 number and is NOT comparable
+    to the nominal numbers; the 200-plant Monte Carlo (TEST_SEED 777, disjoint from 555) is
+    the fair comparison.
+17. **Expert baseline added (stage W):** Wie-Lu (1995) rate-limited eigenaxis quaternion
+    feedback, u = -J(K sat_L(e) + C w) - Ki I + w x (J w + h), with direction-preserving
+    torque saturation. Reason: a reviewer from ADCS would ask how tuned PID compares with
+    the standard large-slew law, not only with pidtune and generic optimizers. Two
+    variants: rule-designed with zero budget (`wie_rule`: w_max from the momentum spec with
+    20% margin, wn from the same torque-limit rule as the analytic PID, zeta 0.9, ki 0.1)
+    and BO-tuned over (wn, zeta, w_max, ki) with the same budget, specs and seeds as Stage
+    B. This separates what the controller structure buys from what the tuning buys.
+18. **Expert-law integrator gated to fine pointing (|e| < 2°).** First version without the
+    gate never settled (integrator wound up over the 30° slew and unwound over > 100 s),
+    the same failure as the analytic PID rule. Slew-mode / fine-pointing-mode switching is
+    standard ADCS practice, so the gate is part of the expert design. The PID designs do
+    NOT get this gate (they are the IECON controller structure); this favours the expert
+    law and is stated in the results.
+19. **Large-slew generalization test (90°, 200 s):** every tuned design is flown, without
+    retuning, on a 90° slew on the nominal plant and on the 200 test plants. Chosen
+    because a time-optimal 90° slew needs ~11.5 mN m s of body momentum, more than the
+    10 mN m s wheel limit, so momentum management becomes binding there and not on 30°.
+

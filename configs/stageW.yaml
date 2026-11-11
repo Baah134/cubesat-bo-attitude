@@ -1,0 +1,14 @@
+# Stage W: three-axis plant, expert control law (Wie-Lu rate-limited eigenaxis
+# quaternion feedback). Parameters (wn, zeta, w_max, ki). Same plant, specs,
+# budget and seeds as Stage B, so BO-tuned PID vs BO-tuned expert law is a
+# like-for-like comparison of controller structure.
+stage: W
+budget: 100
+n_seeds: 10
+methods: [bo, wie_rule]
+fixed_designs: [wie_rule]
+specs:
+  max_overshoot: 5.0
+  max_e_hold_rms_deg: 0.002
+  max_h_peak_frac: 0.9
+  max_sat_frac: 0.2

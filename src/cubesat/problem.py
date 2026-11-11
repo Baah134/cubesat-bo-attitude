@@ -57,10 +57,12 @@ class Problem:
             lo = np.array([BOUNDS_A[k][0] for k in self.names])
             hi = np.array([BOUNDS_A[k][1] for k in self.names])
         else:
-            from .three_axis import BOUNDS_B
-            self.names = list(BOUNDS_B)
-            lo = np.array([BOUNDS_B[k][0] for k in self.names])
-            hi = np.array([BOUNDS_B[k][1] for k in self.names])
+            # stage "B": three-axis PID; stage "W": three-axis Wie-Lu expert law
+            from .three_axis import BOUNDS_B, BOUNDS_W
+            bd = BOUNDS_W if self.stage == "W" else BOUNDS_B
+            self.names = list(bd)
+            lo = np.array([bd[k][0] for k in self.names])
+            hi = np.array([bd[k][1] for k in self.names])
         self.log_lo, self.log_hi = np.log10(lo), np.log10(hi)
         self.dim = len(self.names)
         self.n_constraints = 4
@@ -75,25 +77,28 @@ class Problem:
         return np.clip((g - self.log_lo) / (self.log_hi - self.log_lo), 0.0, 1.0)
 
     # ----- simulation -----
-    def simulate(self, gains, sc=None, env=None, slew_seed=None, hold_seed=None):
+    def simulate(self, gains, sc=None, env=None, slew_seed=None, hold_seed=None, slew=None):
+        """slew: slew scenario (default SLEW, 30 deg); LARGE_SLEW is used for the generalization test."""
         from .simulate import scenario_metrics
         sc = sc or self.sc
+        slew = slew or SLEW
         env = env or self.env
         ss = self.slew_seed if slew_seed is None else slew_seed
         hs = self.hold_seed if hold_seed is None else hold_seed
         if self.stage == "A":
             from .simulate import run_single_axis
-            rs = run_single_axis(gains, SLEW, sc, env, self.sim, ss, self.i_clamp_frac)
+            rs = run_single_axis(gains, slew, sc, env, self.sim, ss, self.i_clamp_frac)
             rh = run_single_axis(gains, HOLD, sc, env, self.sim, hs, self.i_clamp_frac)
         else:
             from .three_axis import run_three_axis
-            rs = run_three_axis(gains, SLEW, sc, env, self.sim, ss, self.i_clamp_frac)
-            rh = run_three_axis(gains, HOLD, sc, env, self.sim, hs, self.i_clamp_frac)
-        ms = scenario_metrics(rs, SLEW, sc)
+            law = 1 if self.stage == "W" else 0
+            rs = run_three_axis(gains, slew, sc, env, self.sim, ss, self.i_clamp_frac, law=law)
+            rh = run_three_axis(gains, HOLD, sc, env, self.sim, hs, self.i_clamp_frac, law=law)
+        ms = scenario_metrics(rs, slew, sc)
         mh = scenario_metrics(rh, HOLD, sc)
-        return self._combine(ms, mh), (rs, rh)
+        return self._combine(ms, mh, slew.horizon), (rs, rh)
 
-    def _combine(self, ms, mh):
+    def _combine(self, ms, mh, horizon=SLEW.horizon):
         diverged = ms["diverged"] or mh["diverged"]
         m = {
             "t_settle": float(ms["t_settle"]),
@@ -108,7 +113,7 @@ class Problem:
             "diverged": bool(diverged),
         }
         if diverged or not np.isfinite(m["e_hold_rms_deg"]):
-            m.update(t_settle=SLEW.horizon, overshoot=CAP_OVERSHOOT, e_hold_rms_deg=CAP_E_RMS_DEG,
+            m.update(t_settle=horizon, overshoot=CAP_OVERSHOOT, e_hold_rms_deg=CAP_E_RMS_DEG,
                      h_peak_frac=CAP_FRAC, sat_frac=CAP_FRAC, energy=float("nan"), diverged=True)
         m["overshoot"] = min(m["overshoot"], CAP_OVERSHOOT)
         m["e_hold_rms_deg"] = min(m["e_hold_rms_deg"], CAP_E_RMS_DEG)
