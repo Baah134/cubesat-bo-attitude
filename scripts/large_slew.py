@@ -1,10 +1,11 @@
 """Generalization test: every tuned design (tuned on the 30 deg slew) flown on a
 90 deg slew it never saw, on the nominal plant and on the same 200 sampled plants.
 
-The 90 deg slew is where reaction-wheel momentum becomes binding: the time-optimal
-(bang-bang) profile would need a peak body rate sqrt(alpha*theta) = 0.27 rad/s,
-i.e. body momentum J*w = 11.5 mN m s > h_max = 10 mN m s. A controller tuned only
-for bandwidth on the small slew should hit the wheel momentum limit here.
+The 90 deg slew is where reaction-wheel momentum becomes nearly binding: per axis
+(error component theta/sqrt(3), alpha = tau_max/J) the time-optimal bang-bang profile
+peaks at w = sqrt(alpha*theta/sqrt(3)) = 0.21 rad/s, i.e. J*w = 8.7 mN m s per wheel,
+87% of h_max = 10 mN m s. A controller without rate limiting that drives the body
+faster than that profile will hit the wheel momentum limit here.
 
 Usage: python -m scripts.large_slew [--n 200] [--stages B W]
 Writes results/large_slew.json, results/tables/large_slew.{csv,md}.

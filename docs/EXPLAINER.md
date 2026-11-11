@@ -159,6 +159,56 @@ so you can say how the new GP-based method compares with your published one.
   feasible = lowest t_settle among designs meeting *all* specs, never the best
   infeasible point.
 
-## 9. What the results show / do not show **[after results]**
+## 9. What the results show / do not show
 
-## 10. Likely reviewer questions **[after results]**
+Numbers are in RESULTS.md; this is the reasoning behind them.
+
+**Shows.**
+- *BO is the most reliable optimizer here.* The GP learns a smooth model of how each
+  spec depends on the gains (in log space), so it can put its next evaluation where the
+  design is likely to be both fast and feasible. TPE handles constraints only through how it ranks points into good and bad, with no
+  model per constraint, which may be why it found no feasible PID design on 3 of 10
+  seeds in Stage B. CMA-ES and GA only see one penalized number, and GA's population of
+  10 gets only 10 generations in 100 evaluations.
+- *Nominal tuning overfits the nominal spacecraft.* The best nominal PID designs sit at
+  the edge of the hold-RMS spec (they use high gain to settle fast, which passes more
+  sensor noise). A ±30% inertia error pushes 14% of plants over the edge. Robust BO
+  optimizes the worst of 8 plants, so it backs away from the edge (95% compliance).
+- *Structure decides what generalizes.* A PID gain set encodes a bandwidth, not a rate
+  limit. On 90° the PID designs command a peak body rate (~34°/s on the nominal plant)
+  whose momentum the wheels cannot absorb, so the wheels clamp and the spacecraft
+  overshoots. The Wie-Lu law limits the eigenaxis rate to w_max by construction
+  (saturating the error term, not the torque), so momentum is bounded on any slew angle.
+- *The expert structure is easy to search.* BO found a feasible expert design within 1–2
+  evaluations (median), against 19 for PID: rate limiting removes most of the
+  overshoot/momentum failure region.
+
+**Does not show.** Hardware behaviour; performance with an estimator in the loop;
+anything about real disturbance environments; generality beyond this one spacecraft
+and objective; onboard (in-flight) tuning.
+
+**Honest negatives.** The BO-tuned expert law is the fastest but only 79% compliant on
+the 30° robustness test (overshoot under inertia error), worse than BO-tuned PID; the
+rule-designed expert law fails the hold spec on 39% of plants; robust BO missed a
+feasible design on one seed; MATLAB pidtune is the only design with 100% compliance.
+
+## 10. Likely reviewer questions
+
+1. *Is the comparison fair?* Same simulator, specs, noise seeds, budget and seeds for all
+   optimizers within a stage. The expert law's fine-pointing integrator gate is an
+   advantage PID does not get; stated in RESULTS.md and DECISIONS.md #18.
+2. *Why is the 6.53 s Stage A result faster than the bang-bang bound?* t_settle is entry
+   into the 0.1° band; the design enters with residual rate and finishes braking inside.
+   Torque never exceeds the limit (DECISIONS.md #15).
+3. *Why not tune the expert law robustly too?* Not run (time). It is the obvious next run.
+4. *Why worst-of-8, not expected compliance?* Worst-case is the standard robust-design
+   criterion and keeps the GP problem the same shape; the 8 training plants are disjoint
+   from the 200 test plants.
+5. *Why PID at all if the expert law generalizes better?* PID is what the IECON study and
+   many CubeSat ADCS codes use; the point is to show what changes when the plant is a
+   spacecraft with momentum limits.
+6. *How sensitive are the results to the specs?* The hold spec was calibrated from a
+   512-point Sobol sweep (0.02° never bound; 0.002° does). Other specs are mission-style
+   choices, not tuned to favour any method.
+7. *What about an estimator / gravity gradient / momentum dumping?* Out of scope; listed
+   as limitations.

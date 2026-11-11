@@ -1,0 +1,386 @@
+{
+  "stage": "W",
+  "reference_best_t_settle": 5.099999999999936,
+  "reach_threshold": 5.60999999999993,
+  "methods": {
+    "bo": {
+      "n_runs": 10,
+      "budget": 100,
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "found_feasible_frac": 1.0,
+      "best_t_settle": {
+        "n": 10,
+        "mean": 5.544999999999925,
+        "std": 0.32810059433045136,
+        "median": 5.489999999999927,
+        "q25": 5.36999999999993,
+        "q75": 5.724999999999922,
+        "min": 5.099999999999936,
+        "max": 6.059999999999915
+      },
+      "best_t_settle_per_seed": [
+        5.5299999999999265,
+        5.169999999999934,
+        5.099999999999936,
+        5.449999999999928,
+        6.059999999999915,
+        5.779999999999921,
+        5.35999999999993,
+        5.399999999999929,
+        6.039999999999916,
+        5.559999999999926
+      ],
+      "best_gains_per_seed": [
+        [
+          3.2489571786656346,
+          1.5093653158208744,
+          0.1309173012782524,
+          0.01594822122967299
+        ],
+        [
+          2.9843693041297352,
+          1.5410040736038275,
+          0.14937537597987005,
+          0.001
+        ],
+        [
+          1.6999447729570476,
+          0.9915180025467616,
+          0.16294487619361725,
+          0.007096975653052495
+        ],
+        [
+          3.7412716149972227,
+          1.5945383165742206,
+          0.1272179397516226,
+          0.001
+        ],
+        [
+          3.1549270972308405,
+          1.6280814671629404,
+          0.15981324424569518,
+          0.001
+        ],
+        [
+          1.9918002346610741,
+          0.8823774710442982,
+          0.11668398842611703,
+          0.001
+        ],
+        [
+          1.3880263059666387,
+          0.8740149721018929,
+          0.1644010347451394,
+          0.001
+        ],
+        [
+          1.4940816423183074,
+          0.9025503848680106,
+          0.15941568648097493,
+          0.001
+        ],
+        [
+          1.7948558415401787,
+          0.9280425595402695,
+          0.1307379667822645,
+          0.001
+        ],
+        [
+          3.353015892900591,
+          1.5140007824625965,
+          0.1284560471702017,
+          0.011076026263263454
+        ]
+      ],
+      "best_metrics_per_seed": [
+        {
+          "t_settle": 5.5299999999999265,
+          "overshoot": 0.01652512572394528,
+          "e_hold_rms_deg": 0.001209865146694785,
+          "hold_t_settle": 1.310000000000001,
+          "h_peak_frac": 0.32266201698275926,
+          "h_violation": false,
+          "sat_frac": 0.025833333333333333,
+          "tau_peak_frac": 1.0,
+          "energy": 1.50291443812971,
+          "diverged": false
+        },
+        {
+          "t_settle": 5.169999999999934,
+          "overshoot": 0.006717387438466312,
+          "e_hold_rms_deg": 0.0012159562984552289,
+          "hold_t_settle": 1.5300000000000011,
+          "h_peak_frac": 0.36664752172840465,
+          "h_violation": false,
+          "sat_frac": 0.03,
+          "tau_peak_frac": 1.0,
+          "energy": 1.8524144671555127,
+          "diverged": false
+        },
+        {
+          "t_settle": 5.099999999999936,
+          "overshoot": 0.1874443034953385,
+          "e_hold_rms_deg": 0.0010879986691051354,
+          "hold_t_settle": 1.6300000000000012,
+          "h_peak_frac": 0.39530091349769847,
+          "h_violation": false,
+          "sat_frac": 0.028333333333333332,
+          "tau_peak_frac": 1.0,
+          "energy": 2.0181708779192866,
+          "diverged": false
+        },
+        {
+          "t_settle": 5.449999999999928,
+          "overshoot": 0.13816411822714644,
+          "e_hold_rms_deg": 0.001304248697870398,
+          "hold_t_settle": 1.290000000000001,
+          "h_peak_frac": 0.31536464329835207,
+          "h_violation": false,
+          "sat_frac": 0.025,
+          "tau_peak_frac": 1.0,
+          "energy": 1.5281650558384756,
+          "diverged": false
+        },
+        {
+          "t_settle": 6.059999999999915,
+          "overshoot": 0.8125395273603736,
+          "e_hold_rms_deg": 0.001204385575475363,
+          "hold_t_settle": 1.5400000000000011,
+          "h_peak_frac": 0.3927622793495263,
+          "h_violation": false,
+          "sat_frac": 0.0325,
+          "tau_peak_frac": 1.0,
+          "energy": 2.134565071851153,
+          "diverged": false
+        },
+        {
+          "t_settle": 5.779999999999921,
+          "overshoot": 0.240838087858289,
+          "e_hold_rms_deg": 0.0012258172462818176,
+          "hold_t_settle": 1.2300000000000009,
+          "h_peak_frac": 0.283244096877539,
+          "h_violation": false,
+          "sat_frac": 0.018333333333333333,
+          "tau_peak_frac": 1.0,
+          "energy": 1.0724877976411198,
+          "diverged": false
+        },
+        {
+          "t_settle": 5.35999999999993,
+          "overshoot": 0.2773561539022137,
+          "e_hold_rms_deg": 0.0011482362884221282,
+          "hold_t_settle": 1.8000000000000014,
+          "h_peak_frac": 0.39777797013774413,
+          "h_violation": false,
+          "sat_frac": 0.024166666666666666,
+          "tau_peak_frac": 1.0,
+          "energy": 2.029296542387929,
+          "diverged": false
+        },
+        {
+          "t_settle": 5.399999999999929,
+          "overshoot": 0.1493309593407984,
+          "e_hold_rms_deg": 0.0011203971887898,
+          "hold_t_settle": 1.7100000000000013,
+          "h_peak_frac": 0.3864645545936219,
+          "h_violation": false,
+          "sat_frac": 0.024166666666666666,
+          "tau_peak_frac": 1.0,
+          "energy": 1.9212503057388262,
+          "diverged": false
+        },
+        {
+          "t_settle": 6.039999999999916,
+          "overshoot": 0.008168991084874082,
+          "e_hold_rms_deg": 0.0011502032855809762,
+          "hold_t_settle": 1.450000000000001,
+          "h_peak_frac": 0.3172929419290918,
+          "h_violation": false,
+          "sat_frac": 0.02,
+          "tau_peak_frac": 1.0,
+          "energy": 1.3197953626464658,
+          "diverged": false
+        },
+        {
+          "t_settle": 5.559999999999926,
+          "overshoot": 0.013552159514671425,
+          "e_hold_rms_deg": 0.001220982553330019,
+          "hold_t_settle": 1.300000000000001,
+          "h_peak_frac": 0.31709293024076196,
+          "h_violation": false,
+          "sat_frac": 0.025,
+          "tau_peak_frac": 1.0,
+          "energy": 1.4740637758258368,
+          "diverged": false
+        }
+      ],
+      "evals_to_first_feasible": {
+        "n": 10,
+        "mean": 2.4,
+        "std": 1.6465452046971292,
+        "median": 1.5,
+        "q25": 1.0,
+        "q75": 4.0,
+        "min": 1.0,
+        "max": 5.0
+      },
+      "evals_to_first_feasible_per_seed": [
+        1,
+        5,
+        2,
+        1,
+        4,
+        4,
+        4,
+        1,
+        1,
+        1
+      ],
+      "evals_to_reach": {
+        "n": 7,
+        "mean": 51.714285714285715,
+        "std": 21.799956312756574,
+        "median": 43.0,
+        "q25": 37.5,
+        "q75": 65.0,
+        "min": 27.0,
+        "max": 87.0
+      },
+      "reach_frac_runs": 0.7,
+      "pidtune_t_settle": null,
+      "evals_to_beat_pidtune": {
+        "n": 0,
+        "mean": null,
+        "std": null,
+        "median": null,
+        "q25": null,
+        "q75": null,
+        "min": null,
+        "max": null
+      },
+      "evals_to_beat_pidtune_per_seed": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "beat_pidtune_frac_runs": 0.0,
+      "feasible_eval_frac": 0.604,
+      "wall_s_mean": 822.0046850700019,
+      "fixed_design_metrics": null
+    },
+    "wie_rule": {
+      "n_runs": 1,
+      "budget": 0,
+      "seeds": [
+        0
+      ],
+      "found_feasible_frac": 1.0,
+      "best_t_settle": {
+        "n": 1,
+        "mean": 37.270000000001154,
+        "std": 0.0,
+        "median": 37.270000000001154,
+        "q25": 37.270000000001154,
+        "q75": 37.270000000001154,
+        "min": 37.270000000001154,
+        "max": 37.270000000001154
+      },
+      "best_t_settle_per_seed": [
+        37.270000000001154
+      ],
+      "best_gains_per_seed": [
+        [
+          0.3015720175460536,
+          0.9,
+          0.1714285714285714,
+          0.1
+        ]
+      ],
+      "best_metrics_per_seed": [
+        {
+          "t_settle": 37.270000000001154,
+          "overshoot": 0.5186936506221693,
+          "e_hold_rms_deg": 0.0012637083236506786,
+          "hold_t_settle": 8.279999999999868,
+          "h_peak_frac": 0.1525878159561126,
+          "h_violation": false,
+          "sat_frac": 0.0,
+          "tau_peak_frac": 0.570928339192153,
+          "energy": 0.3000023929330586,
+          "diverged": false
+        }
+      ],
+      "evals_to_first_feasible": {
+        "n": 1,
+        "mean": 1.0,
+        "std": 0.0,
+        "median": 1.0,
+        "q25": 1.0,
+        "q75": 1.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "evals_to_first_feasible_per_seed": [
+        1
+      ],
+      "evals_to_reach": {
+        "n": 0,
+        "mean": null,
+        "std": null,
+        "median": null,
+        "q25": null,
+        "q75": null,
+        "min": null,
+        "max": null
+      },
+      "reach_frac_runs": 0.0,
+      "pidtune_t_settle": null,
+      "evals_to_beat_pidtune": {
+        "n": 0,
+        "mean": null,
+        "std": null,
+        "median": null,
+        "q25": null,
+        "q75": null,
+        "min": null,
+        "max": null
+      },
+      "evals_to_beat_pidtune_per_seed": [
+        null
+      ],
+      "beat_pidtune_frac_runs": 0.0,
+      "feasible_eval_frac": 1.0,
+      "wall_s_mean": 2.0326429000124335,
+      "fixed_design_metrics": {
+        "t_settle": 37.270000000001154,
+        "overshoot": 0.5186936506221693,
+        "e_hold_rms_deg": 0.0012637083236506786,
+        "hold_t_settle": 8.279999999999868,
+        "h_peak_frac": 0.1525878159561126,
+        "h_violation": false,
+        "sat_frac": 0.0,
+        "tau_peak_frac": 0.570928339192153,
+        "energy": 0.3000023929330586,
+        "diverged": false
+      }
+    }
+  }
+}

@@ -95,6 +95,8 @@ Dated log of design decisions, deviations from CLAUDE.md, and session notes.
     law and is stated in the results.
 19. **Large-slew generalization test (90°, 200 s):** every tuned design is flown, without
     retuning, on a 90° slew on the nominal plant and on the 200 test plants. Chosen
-    because a time-optimal 90° slew needs ~11.5 mN m s of body momentum, more than the
-    10 mN m s wheel limit, so momentum management becomes binding there and not on 30°.
+    because the time-optimal (bang-bang) 90° slew about [1,1,1]/sqrt(3) already needs
+    ~8.7 mN m s per wheel (87% of the 10 mN m s limit; 30° needs ~5 mN m s), so any
+    controller that drives the body faster than the time-optimal profile hits the limit.
+    (Corrected: a first draft said 11.5 mN m s, which is the single-axis number.)
 
