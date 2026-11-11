@@ -7,11 +7,12 @@ import matplotlib.pyplot as plt  # noqa: E402
 COL_W = 3.5
 DBL_W = 7.16
 
-METHOD_ORDER = ["bo", "tpe_iecon", "cmaes", "ga", "random", "pidtune", "analytic"]
-LABELS = {"bo": "Constrained BO (GP)", "tpe_iecon": "TPE (IECON)", "cmaes": "CMA-ES",
+METHOD_ORDER = ["bo_robust", "bo", "tpe_iecon", "cmaes", "ga", "random", "pidtune", "analytic"]
+LABELS = {"bo_robust": "Robust BO (worst of 8 plants)",
+          "bo": "Constrained BO (GP)", "tpe_iecon": "TPE (IECON)", "cmaes": "CMA-ES",
           "ga": "GA", "random": "Random (Sobol)", "pidtune": "MATLAB pidtune",
           "analytic": "Analytic rule"}
-COLORS = {"bo": "#1f4e9c", "tpe_iecon": "#4c9be8", "cmaes": "#d9822b", "ga": "#8e6c3a",
+COLORS = {"bo_robust": "#6a3d9a", "bo": "#1f4e9c", "tpe_iecon": "#4c9be8", "cmaes": "#d9822b", "ga": "#8e6c3a",
           "random": "#7f7f7f", "pidtune": "#2e8b57", "analytic": "#b22222"}
 
 

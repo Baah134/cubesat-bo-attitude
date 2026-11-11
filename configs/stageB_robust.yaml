@@ -1,0 +1,11 @@
+# Robust BO on Stage B: worst case over 8 training plants (seed 555), 100 evaluations, 10 seeds.
+# Histories go to results/histories/stageB/ alongside nominal methods (method name bo_robust).
+stage: B
+budget: 100
+n_seeds: 10
+methods: [bo_robust]
+specs:
+  max_overshoot: 5.0
+  max_e_hold_rms_deg: 0.002
+  max_h_peak_frac: 0.9
+  max_sat_frac: 0.2
