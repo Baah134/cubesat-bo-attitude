@@ -51,8 +51,13 @@ def summarize(stage):
         rs = runs[m]
         bests = [best_feasible(r["history"]) for r in rs]
         ff = [first_feasible_iter(r["history"]) for r in rs]
-        reach = []
+        reach, beat = [], []
+        pid = runs.get("pidtune")
+        pid_t = best_feasible(pid[0]["history"])["objective"] if pid and best_feasible(pid[0]["history"]) else None
         for r in rs:
+            c0 = best_so_far_curve(r["history"], None)
+            ib = np.nonzero(c0 < pid_t)[0] if pid_t is not None else np.array([])
+            beat.append(int(ib[0]) + 1 if ib.size else None)
             c = best_so_far_curve(r["history"], None)
             idx = np.nonzero(c <= ref * REACH_FRAC)[0]
             reach.append(int(idx[0]) + 1 if idx.size else None)
@@ -69,6 +74,10 @@ def summarize(stage):
             "evals_to_first_feasible_per_seed": ff,
             "evals_to_reach": _stats(reach),
             "reach_frac_runs": float(np.mean([x is not None for x in reach])),
+            "pidtune_t_settle": pid_t,
+            "evals_to_beat_pidtune": _stats(beat),
+            "evals_to_beat_pidtune_per_seed": beat,
+            "beat_pidtune_frac_runs": float(np.mean([x is not None for x in beat])),
             "feasible_eval_frac": float(np.mean([h["feasible"] for r in rs for h in r["history"]])),
             "wall_s_mean": float(np.mean([r["wall_s"] for r in rs])),
             "fixed_design_metrics": rs[0]["history"][0]["metrics"] if m in FIXED else None,
@@ -100,6 +109,9 @@ def table(out, stage):
             f"{bt['median']:.2f} [{bt['q25']:.2f}, {bt['q75']:.2f}]",
             "evals to first feasible (median)": "—" if fixed else
             ("never" if d["evals_to_first_feasible"]["n"] == 0 else f"{d['evals_to_first_feasible']['median']:.0f}"),
+            "evals to beat pidtune (median; runs that do)": "—" if fixed else
+            ("never" if d["evals_to_beat_pidtune"]["n"] == 0 else
+             f"{d['evals_to_beat_pidtune']['median']:.0f} ({d['beat_pidtune_frac_runs'] * 100:.0f}%)"),
             f"evals to within 10% of best (median; runs reaching)": "—" if fixed else
             ("never" if d["evals_to_reach"]["n"] == 0 else
              f"{d['evals_to_reach']['median']:.0f} ({d['reach_frac_runs'] * 100:.0f}%)"),
@@ -142,7 +154,7 @@ def figures(out, runs, stage):
     ax.set_xlabel("evaluations")
     ax.set_ylabel("best feasible $t_{settle}$ (s)")
     ax.set_title(f"Stage {stage}: median and IQR over seeds")
-    ax.legend(fontsize=6, ncol=2)
+    ax.legend(fontsize=6, ncol=2, loc="upper center", bbox_to_anchor=(0.5, -0.28), frameon=False)
     save(fig, f"figures/convergence_stage{stage}")
 
     fig, ax = plt.subplots(figsize=(COL_W, 2.0))

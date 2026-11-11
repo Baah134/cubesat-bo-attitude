@@ -2,7 +2,7 @@
 stage: B
 budget: 100
 n_seeds: 10
-methods: [bo, tpe_iecon, cmaes, ga, random, pidtune, analytic]
+methods: [bo, tpe_iecon, cmaes, ga, random_search, pidtune, analytic]
 fixed_designs: [pidtune, analytic]
 specs:
   max_overshoot: 5.0
