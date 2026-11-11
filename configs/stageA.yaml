@@ -1,0 +1,11 @@
+# Stage A: single-axis, (Kp, Ki, Kd), all optimizers x 10 seeds x 60 evaluations
+stage: A
+budget: 60
+n_seeds: 10
+methods: [bo, tpe_iecon, cmaes, ga, random, pidtune, analytic]
+fixed_designs: [pidtune, analytic]   # zero-budget designs: one deterministic evaluation
+specs:
+  max_overshoot: 5.0
+  max_e_hold_rms_deg: 0.002
+  max_h_peak_frac: 0.9
+  max_sat_frac: 0.2

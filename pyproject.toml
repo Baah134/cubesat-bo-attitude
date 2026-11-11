@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cubesat-bo-attitude"
+version = "0.1.0"
+description = "Constraint-aware Bayesian optimization for CubeSat reaction-wheel attitude control (simulation study)"
+requires-python = ">=3.10"
+# Exact pinned versions are recorded in requirements-lock.txt (pip freeze).
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

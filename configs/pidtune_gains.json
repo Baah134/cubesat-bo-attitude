@@ -1,0 +1,22 @@
+{
+  "matlab_version": "24.2.0.2712019 (R2024b)",
+  "method": "pidtune(G, 'PID') default options, continuous plant with Ts/2 input delay",
+  "xy": {
+    "J": 0.042,
+    "Kp": 0.079238414510192687,
+    "Ki": 0.0055010462503987,
+    "Kd": 0.251465271142327,
+    "crossover_rad_s": 5.9003208511443068,
+    "phase_margin_deg": 59.999999999999986,
+    "stable": true
+  },
+  "z": {
+    "J": 0.0067,
+    "Kp": 0.012640413743292635,
+    "Ki": 0.00087754785423026867,
+    "Kd": 0.040114698015561653,
+    "crossover_rad_s": 5.9003208511443068,
+    "phase_margin_deg": 59.999999999999986,
+    "stable": true
+  }
+}

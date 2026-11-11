@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+results/raw/
+results/histories/
+*.nbi
+*.nbc
+.DS_Store
