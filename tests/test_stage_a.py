@@ -1,4 +1,4 @@
-"""Stage A (single-axis) verification. See CLAUDE.md section 6."""
+"""Stage A (single-axis) verification. Verification checklist from the project spec (section 6)."""
 import numpy as np
 import pytest
 
