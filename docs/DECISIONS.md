@@ -1,6 +1,6 @@
 # Decisions log
 
-Dated log of design decisions, deviations from CLAUDE.md, and session notes.
+Dated log of design decisions, deviations from the project spec, and session notes.
 
 ## 2026-11-11 — Session 1
 
@@ -15,7 +15,7 @@ Dated log of design decisions, deviations from CLAUDE.md, and session notes.
 
 ### Decisions
 1. **IECON code reuse.** Prince's IECON repo (github.com/Baah134/iecon-2026-pid-bo-tuning)
-   uses **Optuna TPE with `constraints_func`**, not a BoTorch GP. CLAUDE.md assumed BoTorch.
+   uses **Optuna TPE with `constraints_func`**, not a BoTorch GP. The project spec assumed BoTorch.
    Resolution: the IECON method is included as its own optimizer (`optim/tpe_iecon.py`,
    same formulation: objective = settling time, constraints c <= 0 via `constraints_func`).
    GP-based constrained BO in BoTorch (`optim/bo.py`) is added as the new method. Both
@@ -24,10 +24,10 @@ Dated log of design decisions, deviations from CLAUDE.md, and session notes.
 2. **Equal budgets.** In the IECON code, GA (DE, maxiter=100, popsize=15) and CMA-ES
    (maxiter=100, popsize=15) were run for ~1,500 evaluations with penalty constraints, so
    the "4–20x sample efficiency" there compares unequal budgets. Here every method gets
-   exactly the same evaluation budget (60 Stage A / 100 Stage B), as CLAUDE.md requires.
+   exactly the same evaluation budget (60 Stage A / 100 Stage B), as the project spec requires.
    The sample-efficiency gap may shrink; that will be reported as measured.
 3. **MATLAB pidtune baseline added.** MATLAB R2024b with Control System Toolbox is
-   installed here, so the "pidtune-style" analytic stand-in in CLAUDE.md §4.2 is
+   installed here, so the "pidtune-style" analytic stand-in in the project spec (section 4.2) is
    complemented by the real `pidtune` (scripts/pidtune_baseline.m → configs/pidtune_gains.json).
    Plant per axis: 1/(J s^2 (T_m s+1)) with a Ts/2 = 0.05 s input delay for the 10 Hz ZOH.
    pidtune result: crossover 5.9 rad/s, PM 60°, for both axis groups. The analytic rule is kept too.

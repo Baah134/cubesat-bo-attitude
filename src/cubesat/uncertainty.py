@@ -1,4 +1,4 @@
-"""Plant uncertainty sampling for robustness studies (CLAUDE.md section 5).
+"""Plant uncertainty sampling for robustness studies (project spec, section 5).
 
 Each sample perturbs:
   - principal inertia: each axis x U(0.7, 1.3)                (+-30%)
